@@ -23,7 +23,6 @@ const EMOTION_COPY = {
       "Let's keep the flow going. Try the next question when you're ready.",
   },
   FOCUSED: {
-    // treat FOCUSED like ENGAGED
     title: "You're focused ✨",
     helper: "You look focused. Let's keep going at this pace.",
   },
@@ -40,7 +39,7 @@ const EMOTION_COPY = {
   DISENGAGED: {
     title: "Your mind might have wandered 🌥️",
     helper:
-      "Happens to everyone. Try the next question, use a hint, or take a tiny stretch break.",
+      "Happens to everyone. Try the next question, or tap Skip / Next for a fresh question.",
   },
   NEUTRAL: {
     title: "You're doing fine 🙂",
@@ -82,12 +81,10 @@ function Lesson({
     currentQuestion.correctAnswer ??
     currentQuestion.solution;
 
-  // any emotion coming from WebcamEmotion that we don't have copy for
-  // falls back to NEUTRAL
   const emotionKey = EMOTION_COPY[emotionState] ? emotionState : "NEUTRAL";
   const emotionConfig = EMOTION_COPY[emotionKey];
 
-  // 🔁 React to emotion from webcam
+  // Emotion-triggered reactions
   useEffect(() => {
     if (emotionKey === "FRUSTRATED") {
       setShowHint(true);
@@ -109,7 +106,7 @@ function Lesson({
     if (emotionKey === "DISENGAGED") {
       if (!feedback) {
         setFeedback(
-          "Looks like your attention drifted for a moment. Try this one, or tap Skip / Next for a fresh question."
+          "Looks like your attention drifted. Try this one, or tap Skip / Next for a fresh question."
         );
       }
     }
@@ -121,7 +118,6 @@ function Lesson({
     }
   }, [emotionKey, attemptsOnQuestion, feedback]);
 
-  // reset when subject changes
   useEffect(() => {
     setCurrentIndex(0);
     setUserAnswer("");
@@ -135,7 +131,6 @@ function Lesson({
     setHasAnsweredCorrectlyOnce(false);
   }, [subject]);
 
-  // reset when question changes
   useEffect(() => {
     setUserAnswer("");
     setFeedback("");
@@ -152,9 +147,7 @@ function Lesson({
         <div className="lesson-card">
           <h2 className="lesson-title">No questions found</h2>
           <p className="lesson-text">
-            It looks like the question bank for this subject is empty. Make sure{" "}
-            <code>mathQuestions</code>, <code>scienceQuestions</code>, and{" "}
-            <code>englishQuestions</code> are exported correctly.
+            It looks like the question bank for this subject is empty.
           </p>
         </div>
       </div>
@@ -251,7 +244,7 @@ function Lesson({
 
   return (
     <div className="lesson-wrapper">
-      {/* top bar: NEUROLEARN + Parental insights + emotion */}
+      {/* Header */}
       <div className="lesson-header-row">
         <div className="lesson-logo">NEUROLEARN</div>
 
@@ -265,10 +258,7 @@ function Lesson({
               Parental insights
             </button>
           )}
-
-          {/* compact badge version of the emotion indicator */}
-          <div className="lesson-emotion-badge">
-          </div>
+          <div className="lesson-emotion-badge"></div>
         </div>
       </div>
 
@@ -280,19 +270,18 @@ function Lesson({
           </div>
         </section>
 
+        {/* Top Row */}
         <section className="lesson-top-row">
           <div className="lesson-subject-switcher">
             {Object.keys(QUESTION_BANK).map((key) => (
               <button
                 key={key}
-                className={`subject-pill subject-pill-${key} ${
-                  key === subject
-                    ? `subject-pill-active subject-pill-active-${key}`
-                    : ""
+                className={`subject-pill ${
+                  key === subject ? "subject-pill-active" : ""
                 }`}
                 onClick={() => setSubject(key)}
               >
-                {SUBJECT_LABEL[key] || key}
+                {SUBJECT_LABEL[key]}
               </button>
             ))}
           </div>
@@ -315,6 +304,7 @@ function Lesson({
           </div>
         </section>
 
+        {/* Progress Bar */}
         <section className="lesson-progress">
           <div className="lesson-progress-label">
             Question {currentIndex + 1} of {totalQuestions}
@@ -327,6 +317,7 @@ function Lesson({
           </div>
         </section>
 
+        {/* Main grid */}
         <div className="lesson-grid">
           <section className="lesson-card">
             {isFinished ? (
@@ -338,10 +329,7 @@ function Lesson({
                   You answered <strong>{correctCount}</strong> out of{" "}
                   <strong>{totalQuestions}</strong> questions correctly.
                 </p>
-                <p className="lesson-text subtle">
-                  You can restart this subject or try another one when you are
-                  ready.
-                </p>
+
                 <div className="lesson-finished-actions">
                   <button
                     className="lesson-button primary"
@@ -359,7 +347,7 @@ function Lesson({
               </div>
             ) : (
               <div className="lesson-split">
-                {/* LEFT SIDE — Question, prompt, hint btn, skip btn */}
+                {/* LEFT COLUMN */}
                 <div className="lesson-left-pane">
                   <h2 className="lesson-title">
                     {currentQuestion.title ||
@@ -371,14 +359,19 @@ function Lesson({
                     <p className="lesson-text">{currentQuestion.prompt}</p>
                   )}
 
+                  {/* Hint area: button OR message */}
                   <div className="lesson-actions-column">
-                    <button
-                      type="button"
-                      className="lesson-button secondary"
-                      onClick={handleShowHint}
-                    >
-                      Need a hint?
-                    </button>
+                    {!showHint ? (
+                      <button
+                        type="button"
+                        className="lesson-button secondary"
+                        onClick={handleShowHint}
+                      >
+                        Need a hint?
+                      </button>
+                    ) : (
+                      <div className="lesson-hint-replacement">{feedback}</div>
+                    )}
 
                     <button
                       type="button"
@@ -389,6 +382,7 @@ function Lesson({
                     </button>
                   </div>
 
+                  {/* Actual hint content */}
                   {showHint && currentQuestion.hint && (
                     <div className="lesson-hint-card">
                       <span className="hint-label">Hint</span>
@@ -396,7 +390,8 @@ function Lesson({
                     </div>
                   )}
 
-                  {feedback && (
+                  {/* Feedback box — hidden when hint is active */}
+                  {feedback && !showHint && (
                     <div
                       className={`lesson-feedback ${
                         isCorrect === true
@@ -411,7 +406,7 @@ function Lesson({
                   )}
                 </div>
 
-                {/* RIGHT SIDE — Answer choices */}
+                {/* RIGHT COLUMN — Multiple Choice */}
                 <div className="lesson-right-pane">
                   {choices && choices.length > 0 ? (
                     <div className="lesson-choices lesson-choices-split">
@@ -441,7 +436,6 @@ function Lesson({
                         className="lesson-input"
                         value={userAnswer}
                         onChange={(e) => setUserAnswer(e.target.value)}
-                        placeholder="Type your answer here"
                       />
                       <button className="lesson-button primary" type="submit">
                         Check answer
@@ -453,6 +447,7 @@ function Lesson({
             )}
           </section>
 
+          {/* SIDE PANEL */}
           <aside className="lesson-side-panel">
             <h3 className="lesson-side-title">Today’s learning snapshot</h3>
             <ul className="lesson-stats-list">
@@ -469,11 +464,6 @@ function Lesson({
                 <span className="value">{SUBJECT_LABEL[subject]}</span>
               </li>
             </ul>
-            <p className="lesson-side-note">
-              This space can be used later to show trends from the facial
-              recognition model — like when the learner is most engaged or when
-              to offer breaks.
-            </p>
           </aside>
         </div>
       </div>
