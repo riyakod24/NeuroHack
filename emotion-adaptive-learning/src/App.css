@@ -1,38 +1,152 @@
-.App {
-  text-align: center;
-}
+/* src/App.css */
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+.app-root {
   min-height: 100vh;
+  padding: 24px;
+  background-color: #f4f6fb;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #1f2933;
+}
+
+.app-header {
+  margin-bottom: 24px;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.app-subtitle {
+  margin-top: 8px;
+  max-width: 600px;
+  color: #52606d;
+  font-size: 14px;
+}
+
+.app-main {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.panel {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+
+.lesson-panel {
+  flex: 2;
+  min-height: 260px;
+}
+
+.right-panel {
+  flex: 1.2;
   display: flex;
   flex-direction: column;
+  gap: 12px;
+}
+
+/* Webcam */
+
+.webcam-container {
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0f172a;
+  position: relative;
+}
+
+.webcam-label {
+  position: absolute;
+  z-index: 2;
+  top: 8px;
+  left: 10px;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.8);
+  color: #e5e7eb;
+}
+
+.webcam-video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Emotion indicator */
+
+.emotion-indicator {
+  margin-top: 8px;
+}
+
+.emotion-title {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  color: #52606d;
+}
+
+.emotion-main-row {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  gap: 8px;
+  margin-bottom: 4px;
 }
 
-.App-link {
-  color: #61dafb;
+.emotion-emoji {
+  font-size: 24px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.emotion-label {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.emotion-message {
+  margin: 0;
+  font-size: 13px;
+  color: #52606d;
+}
+
+.lesson-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.question-text {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.option-button {
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  background: #e5ecff;
+}
+
+.feedback-text {
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.hint-box,
+.explanation-box,
+.reengage-box {
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f3f4ff;
+  font-size: 14px;
 }

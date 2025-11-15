@@ -1,23 +1,32 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import WebcamEmotion from "./components/WebcamEmotion";
+import EmotionIndicator from "./components/EmotionIndicator";
+import Lesson from "./components/Lesson";
+import "./App.css";
 
 function App() {
+  const [emotionState, setEmotionState] = useState("FOCUSED");
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
+    <div className="app-root">
+      <header className="app-header">
+        <h1>Emotion-Adaptive Learning</h1>
+        <p className="app-subtitle">
+          A calm learning space that adapts to how kids might be feeling.
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
       </header>
+
+      <main className="app-main">
+        <section className="panel lesson-panel">
+          <Lesson emotionState={emotionState} />
+        </section>
+
+        <section className="panel right-panel">
+          <WebcamEmotion onEmotionChange={setEmotionState} />
+          {console.log("Webcam emotion rendered")}
+          <EmotionIndicator emotionState={emotionState} />
+        </section>
+      </main>
     </div>
   );
 }
