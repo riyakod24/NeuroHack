@@ -364,7 +364,7 @@ body {
 }
 
 .lesson-title {
-  font-size: 1.1rem;
+  font-size: 1.8rem;
   font-weight: 700;
   margin: 0 0 0.5rem 0;
 }
@@ -483,6 +483,14 @@ body {
 
 .lesson-button.secondary:hover {
   background: #e5e7eb;
+}
+
+.lesson-button.secondary,
+.lesson-button.ghost {
+  width: auto;
+  align-self: flex-start; /* prevents flex from stretching them */
+  padding: 0.35rem 0.7rem; /* optional: slightly smaller */
+  font-size: 0.82rem;     /* optional: smaller text */
 }
 
 .lesson-button.ghost {
@@ -669,4 +677,41 @@ body {
   .lesson-text {
     font-size: 0.86rem;
   }
+}
+
+
+/* Container for the two-column split */
+.lesson-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  height: 100%;
+}
+
+/* LEFT panel */
+.lesson-left-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Buttons stacked vertically on the left */
+.lesson-actions-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* RIGHT panel */
+.lesson-right-pane {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* Multiple-choice chips aligned on right */
+.lesson-choices-split {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }

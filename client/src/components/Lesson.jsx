@@ -358,100 +358,98 @@ function Lesson({
                 </div>
               </div>
             ) : (
-              <>
-                <h2 className="lesson-title">
-                  {currentQuestion.title ||
-                    currentQuestion.question ||
-                    "Question"}
-                </h2>
-                {currentQuestion.prompt && (
-                  <p className="lesson-text">{currentQuestion.prompt}</p>
-                )}
+              <div className="lesson-split">
+                {/* LEFT SIDE — Question, prompt, hint btn, skip btn */}
+                <div className="lesson-left-pane">
+                  <h2 className="lesson-title">
+                    {currentQuestion.title ||
+                      currentQuestion.question ||
+                      "Question"}
+                  </h2>
 
-                {choices && choices.length > 0 ? (
-                  <div className="lesson-choices">
-                    {choices.map((choice, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        className={`choice-chip ${
-                          normalize(userAnswer) === normalize(choice)
-                            ? "choice-chip-selected"
-                            : ""
-                        }`}
-                        onClick={() => handleChoiceClick(choice)}
-                      >
-                        {choice}
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <form className="lesson-form" onSubmit={handleSubmit}>
-                    <label className="lesson-label" htmlFor="answer-input">
-                      Your answer
-                    </label>
-                    <input
-                      id="answer-input"
-                      type="text"
-                      className="lesson-input"
-                      value={userAnswer}
-                      onChange={(e) => setUserAnswer(e.target.value)}
-                      placeholder="Type your answer here"
-                    />
-                    <button className="lesson-button primary" type="submit">
-                      Check answer
+                  {currentQuestion.prompt && (
+                    <p className="lesson-text">{currentQuestion.prompt}</p>
+                  )}
+
+                  <div className="lesson-actions-column">
+                    <button
+                      type="button"
+                      className="lesson-button secondary"
+                      onClick={handleShowHint}
+                    >
+                      Need a hint?
                     </button>
-                  </form>
-                )}
 
-                <div className="lesson-actions-row">
-                  <button
-                    type="button"
-                    className="lesson-button secondary"
-                    onClick={handleShowHint}
-                  >
-                    Need a hint?
-                  </button>
-                  <button
-                    type="button"
-                    className="lesson-button ghost"
-                    onClick={goToNextQuestion}
-                  >
-                    Skip / Next
-                  </button>
+                    <button
+                      type="button"
+                      className="lesson-button ghost"
+                      onClick={goToNextQuestion}
+                    >
+                      Skip / Next
+                    </button>
+                  </div>
+
+                  {showHint && currentQuestion.hint && (
+                    <div className="lesson-hint-card">
+                      <span className="hint-label">Hint</span>
+                      <p className="hint-text">{currentQuestion.hint}</p>
+                    </div>
+                  )}
+
+                  {feedback && (
+                    <div
+                      className={`lesson-feedback ${
+                        isCorrect === true
+                          ? "lesson-feedback-correct"
+                          : isCorrect === false
+                          ? "lesson-feedback-incorrect"
+                          : "lesson-feedback-neutral"
+                      }`}
+                    >
+                      {feedback}
+                    </div>
+                  )}
                 </div>
 
-                {showHint && currentQuestion.hint && (
-                  <div className="lesson-hint-card">
-                    <span className="hint-label">Hint</span>
-                    <p className="hint-text">{currentQuestion.hint}</p>
-                  </div>
-                )}
-
-                {showExplanation && (
-                  <div className="lesson-hint-card lesson-explanation-card">
-                    <span className="hint-label">Step-by-step help</span>
-                    <p className="hint-text">
-                      {currentQuestion.explanation ||
-                        "Let's break this down: think about what each number means and do one small step at a time."}
-                    </p>
-                  </div>
-                )}
-
-                {feedback && (
-                  <div
-                    className={`lesson-feedback ${
-                      isCorrect === true
-                        ? "lesson-feedback-correct"
-                        : isCorrect === false
-                        ? "lesson-feedback-incorrect"
-                        : "lesson-feedback-neutral"
-                    }`}
-                  >
-                    {feedback}
-                  </div>
-                )}
-              </>
+                {/* RIGHT SIDE — Answer choices */}
+                <div className="lesson-right-pane">
+                  {choices && choices.length > 0 ? (
+                    <div className="lesson-choices lesson-choices-split">
+                      {choices.map((choice, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          className={`choice-chip ${
+                            normalize(userAnswer) === normalize(choice)
+                              ? "choice-chip-selected"
+                              : ""
+                          }`}
+                          onClick={() => handleChoiceClick(choice)}
+                        >
+                          {choice}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <form className="lesson-form" onSubmit={handleSubmit}>
+                      <label className="lesson-label" htmlFor="answer-input">
+                        Your answer
+                      </label>
+                      <input
+                        id="answer-input"
+                        type="text"
+                        className="lesson-input"
+                        value={userAnswer}
+                        onChange={(e) => setUserAnswer(e.target.value)}
+                        placeholder="Type your answer here"
+                      />
+                      <button className="lesson-button primary" type="submit">
+                        Check answer
+                      </button>
+                    </form>
+                  )}
+                </div>
+              </div>
             )}
           </section>
 
