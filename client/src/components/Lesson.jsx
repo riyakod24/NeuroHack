@@ -22,15 +22,25 @@ const EMOTION_COPY = {
     helper:
       "Let's keep the flow going. Try the next question when you're ready.",
   },
+  FOCUSED: {
+    // treat FOCUSED like ENGAGED
+    title: "You're focused ✨",
+    helper: "You look focused. Let's keep going at this pace.",
+  },
   FRUSTRATED: {
     title: "This feels tricky 😣",
     helper:
       "It's okay to take a breath. Try the hint or go step-by-step. Small wins count.",
   },
-  BORED: {
-    title: "You might be bored 😐",
+  CONFUSED: {
+    title: "This looks confusing 🧩",
     helper:
-      "Want a challenge? Try a new subject or a harder question to re-engage.",
+      "That's totally okay. Let's slow down, use a hint, or walk through it step-by-step.",
+  },
+  DISENGAGED: {
+    title: "Your mind might have wandered 🌥️",
+    helper:
+      "Happens to everyone. Try the next question, use a hint, or take a tiny stretch break.",
   },
   NEUTRAL: {
     title: "You're doing fine 🙂",
@@ -52,6 +62,7 @@ function Lesson({
   const [isCorrect, setIsCorrect] = useState(null);
   const [isFinished, setIsFinished] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [showExplanation, setShowExplanation] = useState(false);
   const [streak, setStreak] = useState(0);
   const [attemptsOnQuestion, setAttemptsOnQuestion] = useState(0);
   const [hasAnsweredCorrectlyOnce, setHasAnsweredCorrectlyOnce] =
@@ -71,16 +82,36 @@ function Lesson({
     currentQuestion.correctAnswer ??
     currentQuestion.solution;
 
-  const emotionKey =
-    ["ENGAGED", "FRUSTRATED", "BORED", "NEUTRAL"].includes(emotionState)
-      ? emotionState
-      : "NEUTRAL";
-
+  // any emotion coming from WebcamEmotion that we don't have copy for
+  // falls back to NEUTRAL
+  const emotionKey = EMOTION_COPY[emotionState] ? emotionState : "NEUTRAL";
   const emotionConfig = EMOTION_COPY[emotionKey];
 
+  // 🔁 React to emotion from webcam
   useEffect(() => {
-    if (emotionKey === "FRUSTRATED" && attemptsOnQuestion >= 1) {
+    if (emotionKey === "FRUSTRATED") {
       setShowHint(true);
+      if (!feedback) {
+        setFeedback("It seems a bit frustrating. Here's a hint to help 💛");
+      }
+    }
+
+    if (emotionKey === "CONFUSED") {
+      setShowHint(true);
+      setShowExplanation(true);
+      if (!feedback) {
+        setFeedback(
+          "This one looks confusing. Let's slow down and walk through it together."
+        );
+      }
+    }
+
+    if (emotionKey === "DISENGAGED") {
+      if (!feedback) {
+        setFeedback(
+          "Looks like your attention drifted for a moment. Try this one, or tap Skip / Next for a fresh question."
+        );
+      }
     }
 
     if (emotionKey === "BORED" && attemptsOnQuestion === 0) {
@@ -88,8 +119,9 @@ function Lesson({
         "Want to try a more challenging one? You can switch subjects anytime."
       );
     }
-  }, [emotionKey, attemptsOnQuestion]);
+  }, [emotionKey, attemptsOnQuestion, feedback]);
 
+  // reset when subject changes
   useEffect(() => {
     setCurrentIndex(0);
     setUserAnswer("");
@@ -97,16 +129,19 @@ function Lesson({
     setIsCorrect(null);
     setIsFinished(false);
     setShowHint(false);
+    setShowExplanation(false);
     setStreak(0);
     setAttemptsOnQuestion(0);
     setHasAnsweredCorrectlyOnce(false);
   }, [subject]);
 
+  // reset when question changes
   useEffect(() => {
     setUserAnswer("");
     setFeedback("");
     setIsCorrect(null);
     setShowHint(false);
+    setShowExplanation(false);
     setAttemptsOnQuestion(0);
     setHasAnsweredCorrectlyOnce(false);
   }, [currentIndex]);
@@ -199,6 +234,7 @@ function Lesson({
     setFeedback("");
     setIsCorrect(null);
     setShowHint(false);
+    setShowExplanation(false);
     setStreak(0);
     setAttemptsOnQuestion(0);
     setHasAnsweredCorrectlyOnce(false);
@@ -229,7 +265,11 @@ function Lesson({
               Parental insights
             </button>
           )}
-          <EmotionIndicator emotionState={emotionKey} />
+
+          {/* compact badge version of the emotion indicator */}
+          <div className="lesson-emotion-badge">
+            <EmotionIndicator emotionState={emotionKey} />
+          </div>
         </div>
       </div>
 
@@ -246,8 +286,10 @@ function Lesson({
             {Object.keys(QUESTION_BANK).map((key) => (
               <button
                 key={key}
-                className={`subject-pill ${
-                  key === subject ? "subject-pill-active" : ""
+                className={`subject-pill subject-pill-${key} ${
+                  key === subject
+                    ? `subject-pill-active subject-pill-active-${key}`
+                    : ""
                 }`}
                 onClick={() => setSubject(key)}
               >
@@ -384,6 +426,16 @@ function Lesson({
                   <div className="lesson-hint-card">
                     <span className="hint-label">Hint</span>
                     <p className="hint-text">{currentQuestion.hint}</p>
+                  </div>
+                )}
+
+                {showExplanation && (
+                  <div className="lesson-hint-card lesson-explanation-card">
+                    <span className="hint-label">Step-by-step help</span>
+                    <p className="hint-text">
+                      {currentQuestion.explanation ||
+                        "Let's break this down: think about what each number means and do one small step at a time."}
+                    </p>
                   </div>
                 )}
 
