@@ -22,15 +22,24 @@ const EMOTION_COPY = {
     helper:
       "Let's keep the flow going. Try the next question when you're ready.",
   },
+  FOCUSED: {
+    title: "You're focused ✨",
+    helper: "You look focused. Let's keep going at this pace.",
+  },
   FRUSTRATED: {
     title: "This feels tricky 😣",
     helper:
       "It's okay to take a breath. Try the hint or go step-by-step. Small wins count.",
   },
-  BORED: {
-    title: "You might be bored 😐",
+  CONFUSED: {
+    title: "This looks confusing 🧩",
     helper:
-      "Want a challenge? Try a new subject or a harder question to re-engage.",
+      "That's totally okay. Let's slow down, use a hint, or walk through it step-by-step.",
+  },
+  DISENGAGED: {
+    title: "Your mind might have wandered 🌥️",
+    helper:
+      "Happens to everyone. Try the next question, or tap Skip / Next for a fresh question.",
   },
   NEUTRAL: {
     title: "You're doing fine 🙂",
@@ -52,6 +61,7 @@ function Lesson({
   const [isCorrect, setIsCorrect] = useState(null);
   const [isFinished, setIsFinished] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [showExplanation, setShowExplanation] = useState(false);
   const [streak, setStreak] = useState(0);
   const [attemptsOnQuestion, setAttemptsOnQuestion] = useState(0);
   const [hasAnsweredCorrectlyOnce, setHasAnsweredCorrectlyOnce] =
@@ -71,16 +81,34 @@ function Lesson({
     currentQuestion.correctAnswer ??
     currentQuestion.solution;
 
-  const emotionKey =
-    ["ENGAGED", "FRUSTRATED", "BORED", "NEUTRAL"].includes(emotionState)
-      ? emotionState
-      : "NEUTRAL";
-
+  const emotionKey = EMOTION_COPY[emotionState] ? emotionState : "NEUTRAL";
   const emotionConfig = EMOTION_COPY[emotionKey];
 
+  // Emotion-triggered reactions
   useEffect(() => {
-    if (emotionKey === "FRUSTRATED" && attemptsOnQuestion >= 1) {
+    if (emotionKey === "FRUSTRATED") {
       setShowHint(true);
+      if (!feedback) {
+        setFeedback("It seems a bit frustrating. Here's a hint to help 💛");
+      }
+    }
+
+    if (emotionKey === "CONFUSED") {
+      setShowHint(true);
+      setShowExplanation(true);
+      if (!feedback) {
+        setFeedback(
+          "This one looks confusing. Let's slow down and walk through it together."
+        );
+      }
+    }
+
+    if (emotionKey === "DISENGAGED") {
+      if (!feedback) {
+        setFeedback(
+          "Looks like your attention drifted. Try this one, or tap Skip / Next for a fresh question."
+        );
+      }
     }
 
     if (emotionKey === "BORED" && attemptsOnQuestion === 0) {
@@ -88,7 +116,7 @@ function Lesson({
         "Want to try a more challenging one? You can switch subjects anytime."
       );
     }
-  }, [emotionKey, attemptsOnQuestion]);
+  }, [emotionKey, attemptsOnQuestion, feedback]);
 
   useEffect(() => {
     setCurrentIndex(0);
@@ -97,6 +125,7 @@ function Lesson({
     setIsCorrect(null);
     setIsFinished(false);
     setShowHint(false);
+    setShowExplanation(false);
     setStreak(0);
     setAttemptsOnQuestion(0);
     setHasAnsweredCorrectlyOnce(false);
@@ -107,6 +136,7 @@ function Lesson({
     setFeedback("");
     setIsCorrect(null);
     setShowHint(false);
+    setShowExplanation(false);
     setAttemptsOnQuestion(0);
     setHasAnsweredCorrectlyOnce(false);
   }, [currentIndex]);
@@ -117,9 +147,7 @@ function Lesson({
         <div className="lesson-card">
           <h2 className="lesson-title">No questions found</h2>
           <p className="lesson-text">
-            It looks like the question bank for this subject is empty. Make sure{" "}
-            <code>mathQuestions</code>, <code>scienceQuestions</code>, and{" "}
-            <code>englishQuestions</code> are exported correctly.
+            It looks like the question bank for this subject is empty.
           </p>
         </div>
       </div>
@@ -199,6 +227,7 @@ function Lesson({
     setFeedback("");
     setIsCorrect(null);
     setShowHint(false);
+    setShowExplanation(false);
     setStreak(0);
     setAttemptsOnQuestion(0);
     setHasAnsweredCorrectlyOnce(false);
@@ -215,7 +244,7 @@ function Lesson({
 
   return (
     <div className="lesson-wrapper">
-      {/* top bar: NEUROLEARN + Parental insights + emotion */}
+      {/* Header */}
       <div className="lesson-header-row">
         <div className="lesson-logo">NEUROLEARN</div>
 
@@ -229,7 +258,7 @@ function Lesson({
               Parental insights
             </button>
           )}
-          <EmotionIndicator emotionState={emotionKey} />
+          <div className="lesson-emotion-badge"></div>
         </div>
       </div>
 
@@ -241,6 +270,7 @@ function Lesson({
           </div>
         </section>
 
+        {/* Top Row */}
         <section className="lesson-top-row">
           <div className="lesson-subject-switcher">
             {Object.keys(QUESTION_BANK).map((key) => (
@@ -251,7 +281,7 @@ function Lesson({
                 }`}
                 onClick={() => setSubject(key)}
               >
-                {SUBJECT_LABEL[key] || key}
+                {SUBJECT_LABEL[key]}
               </button>
             ))}
           </div>
@@ -274,6 +304,7 @@ function Lesson({
           </div>
         </section>
 
+        {/* Progress Bar */}
         <section className="lesson-progress">
           <div className="lesson-progress-label">
             Question {currentIndex + 1} of {totalQuestions}
@@ -286,6 +317,7 @@ function Lesson({
           </div>
         </section>
 
+        {/* Main grid */}
         <div className="lesson-grid">
           <section className="lesson-card">
             {isFinished ? (
@@ -297,10 +329,7 @@ function Lesson({
                   You answered <strong>{correctCount}</strong> out of{" "}
                   <strong>{totalQuestions}</strong> questions correctly.
                 </p>
-                <p className="lesson-text subtle">
-                  You can restart this subject or try another one when you are
-                  ready.
-                </p>
+
                 <div className="lesson-finished-actions">
                   <button
                     className="lesson-button primary"
@@ -317,93 +346,108 @@ function Lesson({
                 </div>
               </div>
             ) : (
-              <>
-                <h2 className="lesson-title">
-                  {currentQuestion.title ||
-                    currentQuestion.question ||
-                    "Question"}
-                </h2>
-                {currentQuestion.prompt && (
-                  <p className="lesson-text">{currentQuestion.prompt}</p>
-                )}
+              <div className="lesson-split">
+                {/* LEFT COLUMN */}
+                <div className="lesson-left-pane">
+                  <h2 className="lesson-title">
+                    {currentQuestion.title ||
+                      currentQuestion.question ||
+                      "Question"}
+                  </h2>
 
-                {choices && choices.length > 0 ? (
-                  <div className="lesson-choices">
-                    {choices.map((choice, idx) => (
+                  {currentQuestion.prompt && (
+                    <p className="lesson-text">{currentQuestion.prompt}</p>
+                  )}
+
+                  {/* Hint area: button OR message */}
+                  <div className="lesson-actions-column">
+                    {!showHint ? (
                       <button
-                        key={idx}
                         type="button"
-                        className={`choice-chip ${
-                          normalize(userAnswer) === normalize(choice)
-                            ? "choice-chip-selected"
-                            : ""
-                        }`}
-                        onClick={() => handleChoiceClick(choice)}
+                        className="lesson-button secondary"
+                        onClick={handleShowHint}
                       >
-                        {choice}
+                        Need a hint?
                       </button>
-                    ))}
-                  </div>
-                ) : (
-                  <form className="lesson-form" onSubmit={handleSubmit}>
-                    <label className="lesson-label" htmlFor="answer-input">
-                      Your answer
-                    </label>
-                    <input
-                      id="answer-input"
-                      type="text"
-                      className="lesson-input"
-                      value={userAnswer}
-                      onChange={(e) => setUserAnswer(e.target.value)}
-                      placeholder="Type your answer here"
-                    />
-                    <button className="lesson-button primary" type="submit">
-                      Check answer
-                    </button>
-                  </form>
-                )}
+                    ) : (
+                      <div className="lesson-hint-replacement">{feedback}</div>
+                    )}
 
-                <div className="lesson-actions-row">
-                  <button
-                    type="button"
-                    className="lesson-button secondary"
-                    onClick={handleShowHint}
-                  >
-                    Need a hint?
-                  </button>
-                  <button
-                    type="button"
-                    className="lesson-button ghost"
-                    onClick={goToNextQuestion}
-                  >
-                    Skip / Next
-                  </button>
+                    <button
+                      type="button"
+                      className="lesson-button ghost"
+                      onClick={goToNextQuestion}
+                    >
+                      Skip / Next
+                    </button>
+                  </div>
+
+                  {/* Actual hint content */}
+                  {showHint && currentQuestion.hint && (
+                    <div className="lesson-hint-card">
+                      <span className="hint-label">Hint</span>
+                      <p className="hint-text">{currentQuestion.hint}</p>
+                    </div>
+                  )}
+
+                  {/* Feedback box — hidden when hint is active */}
+                  {feedback && !showHint && (
+                    <div
+                      className={`lesson-feedback ${
+                        isCorrect === true
+                          ? "lesson-feedback-correct"
+                          : isCorrect === false
+                          ? "lesson-feedback-incorrect"
+                          : "lesson-feedback-neutral"
+                      }`}
+                    >
+                      {feedback}
+                    </div>
+                  )}
                 </div>
 
-                {showHint && currentQuestion.hint && (
-                  <div className="lesson-hint-card">
-                    <span className="hint-label">Hint</span>
-                    <p className="hint-text">{currentQuestion.hint}</p>
-                  </div>
-                )}
-
-                {feedback && (
-                  <div
-                    className={`lesson-feedback ${
-                      isCorrect === true
-                        ? "lesson-feedback-correct"
-                        : isCorrect === false
-                        ? "lesson-feedback-incorrect"
-                        : "lesson-feedback-neutral"
-                    }`}
-                  >
-                    {feedback}
-                  </div>
-                )}
-              </>
+                {/* RIGHT COLUMN — Multiple Choice */}
+                <div className="lesson-right-pane">
+                  {choices && choices.length > 0 ? (
+                    <div className="lesson-choices lesson-choices-split">
+                      {choices.map((choice, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          className={`choice-chip ${
+                            normalize(userAnswer) === normalize(choice)
+                              ? "choice-chip-selected"
+                              : ""
+                          }`}
+                          onClick={() => handleChoiceClick(choice)}
+                        >
+                          {choice}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <form className="lesson-form" onSubmit={handleSubmit}>
+                      <label className="lesson-label" htmlFor="answer-input">
+                        Your answer
+                      </label>
+                      <input
+                        id="answer-input"
+                        type="text"
+                        className="lesson-input"
+                        value={userAnswer}
+                        onChange={(e) => setUserAnswer(e.target.value)}
+                      />
+                      <button className="lesson-button primary" type="submit">
+                        Check answer
+                      </button>
+                    </form>
+                  )}
+                </div>
+              </div>
             )}
           </section>
 
+          {/* SIDE PANEL */}
           <aside className="lesson-side-panel">
             <h3 className="lesson-side-title">Today’s learning snapshot</h3>
             <ul className="lesson-stats-list">
@@ -420,11 +464,6 @@ function Lesson({
                 <span className="value">{SUBJECT_LABEL[subject]}</span>
               </li>
             </ul>
-            <p className="lesson-side-note">
-              This space can be used later to show trends from the facial
-              recognition model — like when the learner is most engaged or when
-              to offer breaks.
-            </p>
           </aside>
         </div>
       </div>
